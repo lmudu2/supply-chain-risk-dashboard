@@ -161,21 +161,42 @@ def get_data():
     }
 
     country_product_map = {
-        'USA': ['Medical Devices', 'Auto Parts', 'Chemicals'],
-        'Germany': ['Auto Parts', 'Industrial Machinery', 'Chemicals'],
-        'China': ['Consumer Electronics', 'Microchips', 'Toys', 'Textiles'],
-        'Vietnam': ['Textiles', 'Footwear', 'Consumer Electronics'],
+        # --- ASIA ---
+        'China': ['Consumer Electronics', 'Plastic Resins', 'Steel Rolls', 'Lithium Batteries'],
+        'Vietnam': ['Textiles', 'Rubber', 'Coffee Beans', 'Electronics'],
+        'Thailand': ['Auto Parts', 'Electronics', 'Rubber'],
+        'India': ['Textiles', 'Raw Cotton', 'Spices', 'Steel Rolls'],
         'Japan': ['Auto Parts', 'Microchips', 'Robotics'],
-        'Brazil': ['Coffee Beans', 'Raw Materials', 'Auto Parts'],
-        'India': ['Textiles', 'Chemicals', 'Pharmaceuticals'],
-        'Mexico': ['Auto Parts', 'Consumer Electronics'],
-        'South Korea': ['Microchips', 'Consumer Electronics'],
-        'France': ['Luxury Goods', 'Aerospace Parts'],
-        'Italy': ['Textiles', 'Industrial Machinery'],
-        'Nigeria': ['Raw Materials', 'Chemicals'],
-        'Ghana': ['Raw Materials', 'Agricultural Products'],
-        'Thailand': ['Auto Parts', 'Electronics'],
-        'Canada': ['Raw Materials', 'Auto Parts']
+        'South Korea': ['Microchips', 'Consumer Electronics', 'Steel Rolls'],
+        'Malaysia': ['Microchips', 'Rubber', 'Palm Oil'],
+
+        # --- EUROPE ---
+        'Germany': ['Auto Parts', 'Industrial Machinery', 'Chemicals', 'Steel Rolls'],
+        'France': ['Luxury Goods', 'Aerospace Parts', 'Chemicals', 'Wine/Beverage'],
+        'Italy': ['Textiles', 'Furniture', 'Leather', 'Industrial Machinery'],
+        'Netherlands': ['Chemicals', 'Flowers/Agri', 'Electronics'],
+        'Spain': ['Agri Products', 'Auto Parts', 'Textiles'],
+        'Sweden': ['Industrial Machinery', 'Auto Parts', 'Steel Rolls'],
+        'Poland': ['Furniture', 'Auto Parts', 'Copper'],
+
+        # --- AMERICAS ---
+        'USA': ['Medical Devices', 'Chemicals', 'Precision Parts', 'Corn/Wheat'],
+        'Canada': ['Wood/Lumber', 'Raw Materials', 'Auto Parts'],
+        'Mexico': ['Auto Parts', 'Consumer Electronics', 'Silver', 'Plastic Resins'],
+        'Brazil': ['Coffee Beans', 'Iron Ore', 'Raw Cotton', 'Soybeans'],
+        'Argentina': ['Soybeans', 'Corn/Wheat', 'Lithium Batteries'],
+        'Chile': ['Copper', 'Lithium Batteries', 'Fruit'],
+        'Peru': ['Copper', 'Gold/Silver', 'Textiles'],
+        'Colombia': ['Coffee Beans', 'Flowers/Agri', 'Oil/Petroleum'],
+        'Panama': ['Bananas/Fruit', 'Seafood'],
+        'Costa Rica': ['Medical Devices', 'Bananas/Fruit'],
+
+        # --- AFRICA ---
+        'Nigeria': ['Crude Oil', 'Cocoa Beans'],
+        'Ghana': ['Cocoa Beans', 'Gold/Diamonds'],
+        'Ivory Coast': ['Cocoa Beans', 'Coffee Beans', 'Rubber'],
+        'Senegal': ['Fish/Seafood', 'Chemicals'],
+        'Cameroon': ['Cocoa Beans', 'Wood/Lumber', 'Oil/Petroleum']
     }
 
     # PRODUCT COMPLEXITY MAP (Risk Adder)
@@ -183,31 +204,51 @@ def get_data():
     product_risk_map = {
         'Microchips': 0.25, 'Medical Devices': 0.20, 'Lithium Batteries': 0.30,
         'Consumer Electronics': 0.15, 'Auto Parts': 0.10, 'Chemicals': 0.20,
-        'Textiles': 0.05, 'Raw Materials': 0.05, 'Coffee Beans': 0.10,
+        'Textiles': 0.05, 'Coffee Beans': 0.10, 'Cocoa Beans': 0.12,
         'Industrial Machinery': 0.15, 'Luxury Goods': 0.10, 'Aerospace Parts': 0.25,
         'Robotics': 0.20, 'Toys': 0.05, 'Footwear': 0.05, 'Furniture': 0.05,
-        'Pharmaceuticals': 0.25, 'Agricultural Products': 0.15
+        'Pharmaceuticals': 0.25, 'Agricultural Products': 0.15,
+        'Raw Cotton': 0.08, 'Steel Rolls': 0.05, 'Iron Ore': 0.05, 
+        'Plastic Resins': 0.05, 'Rubber': 0.05, 'Gold/Diamonds': 0.30,
+        'Crude Oil': 0.10, 'Copper': 0.05
     }
 
     defect_map = {
+        # --- FINISHED GOODS ---
         'Microchips': ['Calibration Error', 'Temperature Excursion', 'Software Bug', 'ESD Damage'],
         'Medical Devices': ['Sterilization Failure', 'Software Bug', 'Calibration Error', 'Packaging Breach'],
         'Lithium Batteries': ['Leakage', 'Overheating Risk', 'Voltage Instability', 'Labeling Error'],
         'Consumer Electronics': ['Software Bug', 'Battery Drain', 'Cosmetic Scratch', 'Dead Pixel'],
         'Auto Parts': ['Dimension Mismatch', 'Rust/Corrosion', 'Material Fatigue', 'Welding Defect'],
-        'Chemicals': ['Impurity Found', 'Container Leak', 'Concentration Error', 'Labeling Error'],
         'Textiles': ['Color Mismatch', 'Stitching Defect', 'Fabric Tear', 'Pattern Error'],
-        # Added fallbacks for new products
-        'Coffee Beans': ['Mold/Fungus', 'Moisture Damage', 'Pest Infestation'],
-        'Raw Materials': ['Impurity Found', 'Moisture Damage'],
-        'Industrial Machinery': ['Calibration Error', 'Material Fatigue'],
+        'Furniture': ['Scratch/Dent', 'Wood Warp', 'Missing Part', 'Upholstery Tear'],
         'Luxury Goods': ['Cosmetic Scratch', 'Packaging Breach'],
         'Aerospace Parts': ['Dimension Mismatch', 'Material Fatigue'],
         'Robotics': ['Software Bug', 'Calibration Error'],
         'Toys': ['Broken Component', 'Paint Defect'],
         'Footwear': ['Stitching Defect', 'Material Tear'],
         'Pharmaceuticals': ['Contamination', 'Temperature Excursion'],
-        'Agricultural Products': ['Spoilage', 'Pest Infestation']
+        
+        # --- RAW MATERIALS (METALS) ---
+        'Steel Rolls': ['Rust/Corrosion', 'Thickness Variance', 'Surface Scratch', 'Edge Crack'],
+        'Iron Ore': ['Moisture Content High', 'Impurity/Silica', 'Granule Size Fail'],
+        'Copper': ['Oxidation', 'Purity Variance'],
+        'Gold/Diamonds': ['Fake/Synthetic', 'Weight Discrepancy', 'Certification Missing'],
+        'Silver': ['Tarnish/Oxidation', 'Weight Discrepancy'],
+
+        # --- RAW MATERIALS (AGRICULTURE) ---
+        'Raw Cotton': ['Moisture Damage', 'Mold/Fungus', 'Fiber Length Fail', 'Pest Infestation'],
+        'Coffee Beans': ['Moisture Damage', 'Mold/Fermentation', 'Insect Damage', 'Broken Beans'],
+        'Cocoa Beans': ['Mold/Fungus', 'Fermentation Issue', 'Pest Infestation'],
+        'Soybeans': ['Moisture Damage', 'Heat Damage', 'Mold'],
+        'Corn/Wheat': ['Moisture Damage', 'Pest Infestation', 'Mold'],
+        'Flowers/Agri': ['Wilting', 'Temperature Damage', 'Pest Infestation'],
+
+        # --- RAW MATERIALS (CHEMICALS/PLASTICS) ---
+        'Plastic Resins': ['Color Mismatch', 'Melting Point Fail', 'Contamination', 'Moisture Damage'],
+        'Chemicals': ['Impurity Found', 'Container Leak', 'Concentration Error', 'Labeling Error'],
+        'Rubber': ['Hardness Variance', 'Surface Cracking', 'Moisture Damage'],
+        'Crude Oil': ['Water Content High', 'Sulfur Content High', 'Density Fail']
     }
 
     # # Mappings
@@ -227,8 +268,8 @@ def get_data():
     qual_reasons = ['Calibration Error', 'Packaging Damage', 'Impure Raw Material', 'Software Bug', 'Temperature Excursion']
     rel_reasons = ['Slow Response', 'Contract Dispute', 'Management Change', 'Pricing Conflict', 'Lack of Transparency']
     fin_reasons = ['High Debt Ratio', 'Liquidity Crisis', 'Pending Lawsuit', 'Merger Uncertainty', 'Credit Downgrade']
-    
-    
+
+
     for i in range(10000):
         # vendor = random.choice(vendors)
         # region = random.choice(regions)
@@ -243,10 +284,10 @@ def get_data():
         product = random.choice(possible_products)
 
         # if region in ['Region_US_East', 'Region_EU_Central']:
-        #     mode = random.choice(['Land', 'Air']) 
+        #     mode = random.choice(['Land', 'Air'])
         # else:
         #     mode = random.choice(['Sea', 'Air'])
-        
+
         if country in ['USA', 'Canada', 'Mexico', 'Panama', 'Costa Rica']:
             mode = random.choice(['Land', 'Air'])
         else:
@@ -298,17 +339,36 @@ def get_data():
         #     qual_reason = random.choice(defect_map[product])
         # else:
         #     qual_reason = "Perfect"
+
+        audit_status = np.random.choice(['Certified', 'Pending', 'Failed'], p=[0.90, 0.08, 0.02])
+
+        if audit_status == 'Certified':
+            # Certified vendors are reliable: Defect rate usually 0-2.5%
+            defect_rate = np.random.uniform(0, 0.025)
+        elif audit_status == 'Pending':
+             # Unverified vendors are riskier: Defect rate 1-4%
+            defect_rate = np.random.uniform(0.01, 0.04)
+        else: # Failed
+            # Failed vendors are bad: Defect rate 3-8%
+            defect_rate = np.random.uniform(0.03, 0.08)
+
+        # --- 3. DETERMINE DEFECT FLAG & ROOT CAUSE ---
+        # Threshold > 3% is a "Problem Shipment"
+        defect_flag = 1 if defect_rate > 0.03 else 0
         
         if defect_flag:
             possible_defects = defect_map.get(product, ['General Defect'])
             qual_reason = random.choice(possible_defects)
         else:
             qual_reason = "Perfect"
-        
+            
+        # --- 4. COMPLIANCE STATUS ---
         compliance_status = 'Fail' if random.random() < 0.02 else 'Pass'
 
+        # --- 5. RELATIONSHIP METRICS ---
         collab_score = round(random.uniform(1, 10), 1)
         rel_reason = random.choice(rel_reasons) if collab_score < 4.0 else "Good Standing"
+
 
         rows.append({
             'Order_ID': f"PO-{20240000+i}",
@@ -338,7 +398,7 @@ def get_data():
             'Defect_Rate': defect_rate,
             'Defect_Flag': defect_flag,
             'Defect_Root_Cause': qual_reason,
-            'Audit_Status': np.random.choice(['Certified', 'Pending', 'Failed'], p=[0.7, 0.2, 0.1]),
+            'Audit_Status': audit_status,
             'Regulatory_Compliance': compliance_status,
             'ESG_Score': int(np.random.normal(75, 15)),
 
@@ -382,7 +442,7 @@ current_regions = st.session_state.sel_region_key
 if current_countries:
     # Find the regions for the selected countries
     needed_regions = list(set(country_to_region_map[c] for c in current_countries))
-    
+
     # If the required Region isn't selected yet, select it!
     # We use a set check to avoid infinite loops
     if not set(needed_regions).issubset(set(current_regions)):
@@ -402,8 +462,8 @@ with c_title:
 with c_f1:
     all_regions = sorted(df['Region'].unique())
     sel_region = st.multiselect(
-        "Region", 
-        all_regions, 
+        "Region",
+        all_regions,
         key='sel_region_key'
     )
 with c_f2:
@@ -412,11 +472,11 @@ with c_f2:
         logical_options = sorted(subset['Country'].unique())
     else:
         logical_options = sorted(df['Country'].unique())
-    
+
     # Safety Net: Keep current selection visible
     current_selection = st.session_state.sel_country_key
     final_options = sorted(list(set(logical_options) | set(current_selection)))
-    
+
     sel_country = st.multiselect("Country", final_options, key='sel_country_key')
 
 with c_f3:
@@ -431,11 +491,11 @@ with c_f3:
     # sel_vendor = st.multiselect("Supplier", available_vendors, default=[])
     temp_df = df.copy()
     # Filter Vendors by Region/Country first
-    if sel_region: 
+    if sel_region:
         temp_df = temp_df[temp_df['Region'].isin(sel_region)]
     if sel_country:
         temp_df = temp_df[temp_df['Country'].isin(sel_country)]
-    
+
     available_vendors = sorted(temp_df['Vendor'].unique())
     sel_vendor = st.multiselect("Supplier", available_vendors, default=[])
 
@@ -444,11 +504,11 @@ with c_prod:
     temp_df = df.copy()
     if sel_vendor:
         temp_df = temp_df[temp_df['Vendor'].isin(sel_vendor)]
-    elif sel_country: 
+    elif sel_country:
         temp_df = temp_df[temp_df['Country'].isin(sel_country)]
     elif sel_region:
         temp_df = temp_df[temp_df['Region'].isin(sel_region)]
-        
+
     available_products = sorted(temp_df['Product'].unique())
     sel_product = st.multiselect("Product", available_products, default=[])
 with c_f4:
@@ -471,15 +531,15 @@ with c_f4:
 # Apply Filters
 filtered_df = df.copy()
 
-if sel_region: 
+if sel_region:
     filtered_df = filtered_df[filtered_df['Region'].isin(sel_region)]
-if sel_country: 
+if sel_country:
     filtered_df = filtered_df[filtered_df['Country'].isin(sel_country)]
-if sel_product: 
+if sel_product:
     filtered_df = filtered_df[filtered_df['Product'].isin(sel_product)]
-if sel_vendor: 
+if sel_vendor:
     filtered_df = filtered_df[filtered_df['Vendor'].isin(sel_vendor)]
-if sel_mode: 
+if sel_mode:
     filtered_df = filtered_df[filtered_df['Shipment_Mode'].isin(sel_mode)]
 
 with c_f5:
@@ -556,7 +616,7 @@ with tab1:
     total_count = len(filtered_df)
 
     danger_pct = (danger_count / total_count * 100) if total_count > 0 else 0
-    
+
     if danger_count == 0:
         clim_msg = "Region Safe"
         clim_color = "off"
@@ -567,13 +627,13 @@ with tab1:
     high_risk_orders = filtered_df[filtered_df['Country_Risk_Index'] > 40]
     high_risk_count = len(high_risk_orders)
     # spend = filtered_df.groupby('Vendor')['Order_Value_USD'].sum()
-    
-    
+
+
     spend_base = base_df.groupby('Vendor')['Order_Value_USD'].sum()
     total_region_spend = spend_base.sum()
 
     top_supplier_name = spend_base.idxmax() if not spend_base.empty else "N/A"
-  
+
     if sel_vendor:
         # CASE A: User selected a supplier -> Show THAT supplier's share
         selected_spend = base_df[base_df['Vendor'].isin(sel_vendor)]['Order_Value_USD'].sum()
@@ -600,7 +660,7 @@ with tab1:
         • 0-40: ✅ Stable (Safe)
         • 41-70: ⚠️ Unstable (Monitor Closely)
         • 71-100: 🛑 Critical (Active Conflict/Tariffs)
-        
+
         **SOURCE:** Aggregated from Political Stability Index & Tariff Data.
         """
     )
@@ -613,7 +673,7 @@ with tab1:
         help="""
         **RISK DEFINITION:**
         Count of orders passing through high-risk zones (Typhoon Belts, Flood Plains).
-        
+
         **IMPACT:**
         Orders in these zones have a **30% higher probability** of weather-related delays.
         """
@@ -627,7 +687,7 @@ with tab1:
         help=f"""
         **DEFINITION:**
         {dep_tooltip}
-        
+
         **BENCHMARK:**
         Ideally, no single supplier should handle more than **20%** of your total volume to prevent "Vendor Lock-in."
         """
@@ -750,7 +810,7 @@ with tab2:
 
     bad_credit_df = filtered_df[filtered_df['Supplier_Credit_Rating'].isin(['C', 'CC', 'CCC'])] # Added CCC for completeness
     risky_order_count = len(bad_credit_df)
-    
+
     if risky_order_count == 0:
         credit_msg = "No Exposure"
         credit_color = "off"
@@ -789,7 +849,7 @@ with tab2:
         help="""
         **DEFINITION:**
         Total count of orders assigned to vendors with 'C' or 'CC' credit ratings.
-        
+
         **RISK:**
         These vendors have a high probability of bankruptcy or operational failure.
         """
@@ -803,7 +863,7 @@ with tab2:
         help="""
         **DEFINITION:**
         Average number of days we take to pay our invoices.
-        
+
         **BENCHMARKS:**
         • < 45 Days: Good for vendor, bad for our cash.
         • 45-75 Days: Healthy industry standard.
@@ -818,7 +878,7 @@ with tab2:
         help="""
         **DEFINITION:**
         Compares our purchase price to the global market average.
-        
+
         **SCORING:**
         • 100%: We pay the exact market rate.
         • > 100%: We are **overpaying** (Negative Variance).
@@ -857,51 +917,56 @@ with tab2:
 
     with c2:
 
-        st.markdown("Financial Watchlist")
+        st.markdown("Top 10 High-Risk Vendor Watchlist")
         # st.dataframe(bad_credit_df[['Vendor', 'Country', 'Product', 'Financial_Risk_Reason', 'DPO_Impact_Days']].head(10), hide_index=True, use_container_width=True)
         # st.markdown("Affected Products & Locations") # UPDATED HEADER
-        drill_cols = ['Vendor', 'Country', 'Product', 'Financial_Risk_Reason','DPO_Impact_Days','Cost_Competitiveness']
-        display_names = ['Vendor', 'Country', 'Product', 'Risk Reason', 'Avg Days to Pay', 'Cost vs Mkt %']
-        if not bad_credit_df.empty:
-            # 2. Prepare Data (Top 15 for scrolling)
-            table_data = bad_credit_df[drill_cols].head(15)
+        watchlist_cols = ['Vendor', 'Product', 'Supplier_Credit_Rating', 'Financial_Risk_Reason', 'DPO_Impact_Days']
+        display_cols = ['Vendor', 'Product', 'Rating', 'Main Issue', 'Days to Pay']
 
-            # 3. Create Plotly Table
+        # 2. FILTER DATA (Risky Suppliers Only)
+        # We save this into 'financial_risk_df' (NOT 'table_data')
+        financial_risk_df = filtered_df[
+            filtered_df['Supplier_Credit_Rating'].isin(['C', 'CC', 'CCC', 'BB'])
+        ].sort_values(by='Order_Value_USD', ascending=False).head(10)
+
+        if not financial_risk_df.empty:
+            # 3. PREPARE TABLE VALUES
+            # We must use 'financial_risk_df' here because 'table_data' does not exist in this tab
+            table_values = [financial_risk_df[col] for col in watchlist_cols]
+
             import plotly.graph_objects as go
 
-            fig_table = go.Figure(data=[go.Table(
-                columnorder = [0, 1, 2, 3, 4, 5],
-                columnwidth = [120, 80, 80, 120, 60], # Adjust widths so "Reason" and "Vendor" fit
+            fig_fin = go.Figure(data=[go.Table(
+                columnorder=[0, 1, 2, 3, 4],
+                columnwidth=[100, 100, 60, 120, 80],
 
                 header=dict(
-                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in display_names], # Bold Headers
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12, family="Arial Black"), # Black Text
-                    height=30
+                    values=[f"<b>{c}</b>" for c in display_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
                 ),
 
                 cells=dict(
-                    values=[table_data[k] for k in drill_cols],
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12), # Black Text
-                    height=25
+                    values=table_values,
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    
+                    # 4. COLOR LOGIC
+                    # We reference 'financial_risk_df' here to avoid the NameError
+                    font_color=[
+                        'black', # Vendor
+                        'black', # Product
+                        ['red' if 'C' in x else 'black' for x in financial_risk_df['Supplier_Credit_Rating']],
+                        'black', # Reason
+                        'black'  # DPO
+                    ]
                 )
             )])
 
-            # 4. Remove margins & set height
-            fig_table.update_layout(
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=300 # Fixed height for scrolling
-            )
-
-            st.plotly_chart(fig_table, use_container_width=True)
-
+            fig_fin.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=300)
+            st.plotly_chart(fig_fin, use_container_width=True)
         else:
-            st.info("✅ No high-risk suppliers found in current filter.")
+            st.success("✅ Financial Stability: No high-risk vendors detected in this filter.")
 
 
 # === TAB 3: OPS (Detailed) ===
@@ -922,8 +987,8 @@ with tab3:
     # otd = (1 - filtered_df['Is_Late'].mean()) * 100
     # Metric B: Consistency
     consistency_std = filtered_df['Delay_Days'].std()
-    if pd.isna(consistency_std): consistency_std = 0 
-    
+    if pd.isna(consistency_std): consistency_std = 0
+
     # FIX 1: Relaxed the threshold from 5 to 8 so it isn't ALWAYS red
     if consistency_std > 8:
         cons_color = "inverse" # Red (High variance)
@@ -949,7 +1014,7 @@ with tab3:
     # cap = filtered_df['Capacity_Utilization'].mean()
     # Metric D: Utilization
     avg_util = filtered_df['Capacity_Utilization'].mean()
-    
+
     if avg_util > 85:
         util_msg = "Overloaded (Risk)"
         util_color = "inverse" # Red
@@ -968,7 +1033,7 @@ with tab3:
         help="""
         **DEFINITION:**
         Percentage of orders arriving on or before the committed date.
-        
+
         **TARGET:**
         > 95% is considered standard for reliable supply chains.
         """
@@ -980,17 +1045,14 @@ with tab3:
         delta=cons_msg,
         delta_color=cons_color,
         help="""
-        **HOW IT IS CALCULATED:**
-        We calculate the **Standard Deviation** of the 'Days Late' column.
+        **DEFINITION:**
+        This is the **Standard Deviation** (the "Spread") of your delivery times.
         
-        **THE MATH:**
-        If one order is 2 days early and another is 10 days late, the gap is huge (High Deviation).
-        If all orders are exactly 1 day late, the gap is zero (High Consistency).
+        **WHAT THIS TELLS YOU:**
+        It means **68% of your orders** arrive within this ±7 day window.
         
-        **THRESHOLDS:**
-        • < ±4 Days: ✅ Stable
-        • ±4-8 Days: ⚠️ Variable
-        • > ±8 Days: 🛑 Unpredictable
+        **NOTE:**
+        This is NOT the maximum delay. Extreme outliers (e.g., 20+ days late) are shown in the **"Top 10 Critical Delays"** table below.
         """
     )
     k3.metric(
@@ -1011,7 +1073,7 @@ with tab3:
         help="""
         **DEFINITION:**
         Capacity Utilization of the supplier's manufacturing lines.
-        
+
         **ZONES:**
         • < 60%: Underutilized.
         • 70-85%: ✅ Optimal Health.
@@ -1055,12 +1117,14 @@ with tab3:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Late Orders")
+        st.markdown("Top 10 Late Orders")
         drill_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Delay_Root_Cause', 'Delay_Days']
 
         if not late_df.empty:
             # 2. Prepare Data (Top 15 for scrolling)
-            table_data = late_df[drill_cols].head(15)
+            table_data = late_df[drill_cols]\
+                .sort_values('Delay_Days', ascending=False)\
+                .head(10)
 
             # 3. Create Plotly Table
             import plotly.graph_objects as go
@@ -1104,17 +1168,93 @@ with tab4:
     st.markdown("Quality & Compliance")
     k1, k2, k3, k4 = st.columns(4)
 
-    defect_df = filtered_df[filtered_df['Defect_Flag'] == 1]
+    # defect_df = filtered_df[filtered_df['Defect_Flag'] == 1]
     defect = filtered_df['Defect_Flag'].mean() * 100
-    certified = len(filtered_df[filtered_df['Audit_Status'] == 'Certified'])
-    cert_rate = (certified / len(filtered_df)) * 100
-    esg = filtered_df['ESG_Score'].mean()
-    violations = len(filtered_df[filtered_df['Regulatory_Compliance'] == 'Fail'])
+    
+    # Metric A: Defect Rate (Percentage of orders flagged as defective)
+    defect_df = filtered_df[filtered_df['Defect_Flag'] == 1]
+    defect_pct = filtered_df['Defect_Flag'].mean() * 100
+    
+    if defect_pct > 10:
+        def_msg = "Critical Failure"
+        def_color = "inverse"        # Red
+    elif defect_pct > 5:
+        def_msg = "Warning Area"     # 5-10% is Yellow/Warning
+        def_color = "off"            # Grey/Yellow
+    else:
+        def_msg = "Quality Good"     # < 5% is Green
+        def_color = "normal"
 
-    k1.metric("Item Defect Rate", f"{defect:.2f}%", delta="Target < 2%", delta_color="inverse")
-    k2.metric("ISO Certified Suppliers", f"{cert_rate:.0f}%")
-    k3.metric("Compliance Violations", f"{violations}", delta="Legal Risk" if violations > 0 else "Clean", delta_color="inverse" if violations > 0 else "normal")
-    k4.metric("Sustainability Score", f"{esg:.0f}/100")
+    # Metric B: ISO Certification
+    certified_count = len(filtered_df[filtered_df['Audit_Status'] == 'Certified'])
+    cert_rate = (certified_count / len(filtered_df)) * 100 if len(filtered_df) > 0 else 0
+    
+    if cert_rate < 80:
+        cert_msg = "Many Uncertified"
+        cert_color = "inverse" # Red
+    else:
+        cert_msg = "Verified Supply"
+        cert_color = "normal"
+
+    # Metric C: Compliance Violations (Count)
+    violations = len(filtered_df[filtered_df['Regulatory_Compliance'] == 'Fail'])
+    
+    if violations > 0:
+        viol_msg = "Legal Issues Found"
+        viol_color = "inverse" # Red
+    else:
+        viol_msg = "Clean"
+        viol_color = "normal"
+
+    # Metric D: ESG Score
+    esg = filtered_df['ESG_Score'].mean()
+    k1.metric(
+        label="Problem Shipment Rate",
+        value=f"{defect_pct:.1f}%",
+        delta=def_msg,
+        delta_color=def_color,
+        help="""
+        **DEFINITION:**
+        Percentage of shipments that triggered a defect claim (Damage > 3%).
+        
+        **WHY IS THIS HIGH?**
+        Our threshold is strict. Any shipment with >3% broken items is flagged as a "Problem Shipment."
+        """
+    )
+    k2.metric(
+        label="ISO Certified Volume",
+        value=f"{cert_rate:.0f}%",
+        delta=cert_msg,
+        delta_color=cert_color,
+        help="""
+        **DEFINITION:**
+        Percentage of orders coming from suppliers with active **ISO 9001** certification.
+        
+        """
+    )
+    k3.metric(
+        label="Compliance Violations",
+        value=f"{violations}",
+        delta=viol_msg,
+        delta_color=viol_color,
+        help="""
+        **DEFINITION:**
+        Total count of orders flagged for Regulatory Failures (e.g., Missing SDS, Labor Violations).
+        
+        **TARGET:**
+        Target is **0**. Even one violation can lead to customs seizures.
+        """
+    )
+    k4.metric(
+        label="Sustainability Score",
+        value=f"{esg:.0f}/100",
+        delta="Avg ESG Rating",
+        delta_color="off",
+        help="""
+        **DEFINITION:**
+        Average Environmental, Social, and Governance (ESG) score of selected suppliers.
+        """
+    )
 
     # st.markdown("---")
 
@@ -1153,12 +1293,36 @@ with tab4:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Defect & Compliance Log")
+        st.markdown("Top 10 Defect & Compliance Log")
+        
         drill_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Defect_Root_Cause', 'Regulatory_Compliance']
+        display_names = ['Order ID', 'Product', 'Country', 'Vendor', 'Defect', 'Compliance']
+        
+        quality_issues_df = filtered_df[
+            (filtered_df['Defect_Flag'] == 1) | 
+            (filtered_df['Regulatory_Compliance'] == 'Fail')
+        ].copy()
 
-        if not defect_df.empty:
-            # 2. Prepare Data (Top 15)
-            table_data = defect_df[drill_cols].head(15)
+        if not quality_issues_df.empty:
+            # 3. SMART LOGIC FUNCTION (The Fix)
+            def determine_issue(row):
+                # If the text says "Perfect" BUT Compliance Failed -> It is actually a Regulatory Failure
+                if row['Defect_Root_Cause'] == "Perfect" and row['Regulatory_Compliance'] == 'Fail':
+                    return "Regulatory Failure"
+                
+                # Otherwise, show the actual defect (e.g., "Impurity Found")
+                return row['Defect_Root_Cause']
+
+            # 4. APPLY LOGIC (Creates the new column)
+            quality_issues_df['Primary_Issue'] = quality_issues_df.apply(determine_issue, axis=1)
+
+            # 5. SORT: Fails first
+            table_data = quality_issues_df.sort_values(
+                by=['Regulatory_Compliance', 'Defect_Flag'], 
+                ascending=[True, False]
+            ).head(10)
+
+            table_data_display = table_data[drill_cols]
 
             # 3. Create Plotly Table
             import plotly.graph_objects as go
@@ -1206,7 +1370,7 @@ with tab5:
 
     # Metric A: Responsiveness (Communication Speed)
     resp = filtered_df['Responsiveness_Score'].mean()
-    
+
     if resp > 90:
         resp_msg = "Avg < 2 hrs"
         resp_color = "normal" # Green
@@ -1219,7 +1383,7 @@ with tab5:
 
     # Metric B: Innovation Index
     innov = filtered_df['Innovation_Index'].mean()
-    
+
     if innov > 7:
         inn_msg = "Strategic Partner" # High value add
         inn_color = "normal"
@@ -1232,7 +1396,7 @@ with tab5:
 
     # Metric C: Partnership Strength (Collaboration)
     collab = filtered_df['Collaboration_Index'].mean()
-    
+
     # Logic: Low collaboration = High Friction
     if collab < 4:
         col_msg = "High Friction"
@@ -1322,13 +1486,16 @@ with tab5:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Partner Issue Log")
+        st.markdown("Top 10 Partner Issue Log")
         drill_cols = ['Vendor', 'Country', 'Relationship_Issue', 'Collaboration_Index']
 
         if not friction_df.empty:
             # 2. Prepare Data (Remove duplicates & Take Top 15)
             # We use drop_duplicates() here because relationship issues are usually vendor-level, not order-level
-            table_data = friction_df[drill_cols].drop_duplicates().head(15)
+            table_data = friction_df[drill_cols]\
+                .sort_values('Collaboration_Index', ascending=True)\
+                .drop_duplicates()\
+                .head(10)
 
             # 3. Create Plotly Table
             import plotly.graph_objects as go
@@ -1372,49 +1539,49 @@ with tab5:
 with tab6:
     st.markdown("### 🤖 Risk Simulator")
     st.caption("Predict supply chain disruption probability for new orders.")
-    
+
     c_sim1, c_sim2 = st.columns([1, 2])
     with c_sim1:
         # --- STEP 1: MOVE SELECTORS OUTSIDE THE FORM ---
         # This allows the app to 'refresh' the risk slider immediately when you change country
         st.markdown("Select Context")
         country_in = st.selectbox("Origin Country", sorted(df['Country'].unique()))
-        
+
         valid_products = sorted(df[df['Country'] == country_in]['Product'].unique())
         prod_in = st.selectbox("Product Type", valid_products)
-        
+
         # --- STEP 2: CALCULATE DEFAULTS ---
         # Look up the actual average risk for this country in our data
         current_risk_avg = int(df[df['Country'] == country_in]['Country_Risk_Index'].mean())
-        
+
         # Look up the Product Risk (just for reference/defaults if needed)
         # (Optional: You could also adjust defaults based on product, but Country is key for Risk Index)
 
         # --- STEP 3: THE FORM (Inputs that use the defaults) ---
         with st.form("sim_form"):
-            st.markdown("Adjust Parameters") 
-            
+            st.markdown("Adjust Parameters")
+
             # The Slider now defaults to 'current_risk_avg'
             # We use 'value=current_risk_avg' so it auto-updates!
             r_in = st.slider("Region Risk Index (0-100)", 0, 100, value=current_risk_avg, help=f"Average Risk for {country_in} is {current_risk_avg}")
-            
+
             v_in = st.number_input("Order Value ($)", min_value=10000, max_value=1000000, value=50000)
             c_in = st.slider("Factory Capacity Utilization (%)", 0, 100, 85)
-            
+
             submitted = st.form_submit_button("Run Prediction", use_container_width=True)
-    
+
     with c_sim2:
         if submitted:
             # Encode Inputs
             ctry_code = le_country.transform([country_in])[0]
             prod_code = le_product.transform([prod_in])[0]
-            
+
             # Predict
             # The model uses the SLIDER value (r_in), which is now accurate to the country
             prob = model.predict_proba([[r_in, v_in, c_in, ctry_code, prod_code]])[0][1]
-            
+
             st.markdown("#### 📊 Prediction Result")
-            
+
             # Create a nice result card
             if prob > 0.5:
                 st.markdown(f"""
@@ -1436,10 +1603,10 @@ with tab6:
                         <b>Recommendation:</b> Proceed with standard procurement process.
                     </div>
                 """, unsafe_allow_html=True)
-            
+
             # Feature Explanation (Optional: Shows why)
             st.caption(f"Model Inputs: Risk={r_in}, Value=${v_in:,}, Cap={c_in}%")
-            
+
         else:
             # Placeholder before they click run
             st.info(f"👈 Current Average Risk for **{country_in}** is **{current_risk_avg}**. Click 'Run Prediction' to analyze.")
@@ -1456,7 +1623,7 @@ with st.expander("How are these metrics calculated?"):
     | Metric | Formula | Interpretation |
     | :--- | :--- | :--- |
     | **Risky Suppliers** | `Count(Suppliers with Credit Rating 'C' or 'CC')` | Number of active orders with suppliers near bankruptcy. |
-    | **Avg Days to Pay (DPO)** | `Average(Payment Terms in Days)` | **<45**: We pay too fast (Cash flow hurt). **>75**: We pay too slow (Supplier hurt). |
+    | **Avg Invoice** | `Average(Payment Terms in Days)` | **<45**: We pay too fast (Cash flow hurt). **>75**: We pay too slow (Supplier hurt). |
     | **Price vs Market** | `Average(Purchase Price / Market Rate) * 100` | **100%**: Fair Market Value. **>100%**: Overpaying. **<100%**: Discount. |
 
     ### Operations
@@ -1464,14 +1631,17 @@ with st.expander("How are these metrics calculated?"):
     | :--- | :--- | :--- |
     | **On-Time Rate** | `(1 - Late_Rate) * 100` | Percentage of orders arriving on or before the promised date. |
     | **Consistency** | `StdDev(Actual_Date - Promised_Date)` | **±1-3 Days**: Reliable. **>±8 Days**: Highly Unpredictable. |
+    | **Error-Free Orders** | `Average(Order_Accuracy_Rate)` | **% Perfect Orders**. Checks for correct quantity, documentation, and packaging. |
     | **Factory Strain** | `Average(Capacity_Utilization)` | **>85%**: Factory is overloaded; rush orders will likely fail. |
 
     ### Quality & ESG
     | Metric | Formula | Interpretation |
     | :--- | :--- | :--- |
-    | **Defect Rate** | `(Count of Orders with Defects / Total Orders) * 100` | Percentage of shipments arriving with damaged or wrong items. |
-    | **ISO Certified** | `(Orders from Certified Vendors / Total Orders) * 100` | **<50%** means we rely heavily on unverified/non-standardized suppliers.  |
+    | **Problem Shipment Rate** | `(Count of Orders with Defects / Total Orders) * 100` | Percentage of shipments arriving with damaged or wrong items. |
+    | **ISO Certified** | `(Orders from Certified Vendors / Total Orders) * 100` | **<50%** means we rely heavily on unverified/non-standardized suppliers. |
+    | **Compliance Violations** | `Count(Regulatory_Compliance == 'Fail')` | Total count of orders flagged for **missing paperwork**, **safety violations**, or **customs failures**. |
     | **Sustainability Score** | `Average(ESG_Score)` | **0-100 Score**. **<50** indicates high environmental or ethical risk. |
+
     ### Relationship
     | Metric | Formula | Interpretation |
     | :--- | :--- | :--- |
@@ -1479,4 +1649,3 @@ with st.expander("How are these metrics calculated?"):
     | **Innovation Score** | `Average(Innovation_Index)` | **1-10 Scale**. Higher score means the supplier proactively suggests design/cost improvements. |
     | **Partnership Strength** | `Average(Collaboration_Index)` | **1-10 Scale**. **<4** indicates frequent friction (disputes, lack of transparency). |
     """)
-    

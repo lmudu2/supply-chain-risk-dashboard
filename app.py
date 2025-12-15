@@ -1453,7 +1453,7 @@ with tab5:
 
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("Top Friction Points")
+        st.markdown("Relationship Issues")
         rel_reasons_df = friction_df['Relationship_Issue'].value_counts().reset_index()
         rel_reasons_df.columns = ['Reason', 'Count']
         # fig = px.bar(rel_reasons_df, x='Count', y='Reason', orientation='h', color='Count', color_continuous_scale='Purples')
@@ -1486,7 +1486,7 @@ with tab5:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Top 10 Partner Issue Log")
+        st.markdown("Top 10 Partner Issue Logs")
         drill_cols = ['Vendor', 'Country', 'Relationship_Issue', 'Collaboration_Index']
 
         if not friction_df.empty:

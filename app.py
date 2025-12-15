@@ -1453,7 +1453,7 @@ with tab5:
 
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("Relationship Issues")
+        st.markdown("Collaboration Problems")
         rel_reasons_df = friction_df['Relationship_Issue'].value_counts().reset_index()
         rel_reasons_df.columns = ['Reason', 'Count']
         # fig = px.bar(rel_reasons_df, x='Count', y='Reason', orientation='h', color='Count', color_continuous_scale='Purples')

@@ -622,8 +622,8 @@ with tab2:
         st.markdown("Financial Watchlist")
         # st.dataframe(bad_credit_df[['Vendor', 'Country', 'Product', 'Financial_Risk_Reason', 'DPO_Impact_Days']].head(10), hide_index=True, use_container_width=True)
         # st.markdown("Affected Products & Locations") # UPDATED HEADER
-        drill_cols = ['Vendor', 'Country', 'Product', 'Financial_Risk_Reason', 'DPO_Impact_Days']
-        
+        drill_cols = ['Vendor', 'Country', 'Product', 'Financial_Risk_Reason', 'DPO_Impact_Days', 'Cost_Competitiveness']
+        display_names = ['Vendor', 'Country', 'Product', 'Risk Reason', 'Avg Days to Pay', 'Cost vs Mkt %']
         if not bad_credit_df.empty:
             # 2. Prepare Data (Top 15 for scrolling)
             table_data = bad_credit_df[drill_cols].head(15)
@@ -632,11 +632,11 @@ with tab2:
             import plotly.graph_objects as go
 
             fig_table = go.Figure(data=[go.Table(
-                columnorder = [0, 1, 2, 3, 4],
+                columnorder = [0, 1, 2, 3, 4, 5],
                 columnwidth = [120, 80, 80, 120, 60], # Adjust widths so "Reason" and "Vendor" fit
                 
                 header=dict(
-                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in drill_cols], # Bold Headers
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in display_names], # Bold Headers
                     line_color='black',       # Black Border
                     fill_color='white',       # White Background
                     align='left',

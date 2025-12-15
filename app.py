@@ -960,23 +960,31 @@ with tab5:
             st.info("✅ All supplier relationships are in good standing.")
 # === TAB 6: SIMULATOR (Includes Product Selection) ===
 with tab6:
-    st.markdown("Risk Simulator")
+    st.markdown("### 🤖 Risk Simulator")
     st.caption("Predict supply chain disruption probability for new orders.")
     
     c_sim1, c_sim2 = st.columns([1, 2])
     with c_sim1:
+        st.markdown("Select Context")
+        country_in = st.selectbox("Origin Country", sorted(df['Country'].unique()))
+        prod_in = st.selectbox("Product Type", sorted(df['Product'].unique()))
+
+        # Look up the actual average risk for this country in our data
+        current_risk_avg = int(df[df['Country'] == country_in]['Country_Risk_Index'].mean())
+        
+        # Look up the Product Risk (just for reference/defaults if needed)
+        # (Optional: You could also adjust defaults based on product, but Country is key for Risk Index)
+
         with st.form("sim_form"):
-            st.markdown("#### **Order Parameters**") # Bold Header
+            st.markdown("Adjust Parameters") 
             
-            # The CSS above will force these to be White/Black
-            country_in = st.selectbox("Origin Country", sorted(df['Country'].unique()))
-            prod_in = st.selectbox("Product Type", sorted(df['Product'].unique()))
+            # The Slider now defaults to 'current_risk_avg'
+            # We use 'value=current_risk_avg' so it auto-updates!
+            r_in = st.slider("Region Risk Index (0-100)", 0, 100, value=current_risk_avg, help=f"Average Risk for {country_in} is {current_risk_avg}")
             
-            r_in = st.slider("Region Risk Index (0-100)", 0, 100, 60)
             v_in = st.number_input("Order Value ($)", min_value=10000, max_value=1000000, value=50000)
             c_in = st.slider("Factory Capacity Utilization (%)", 0, 100, 85)
             
-            # The CSS targets 'stFormSubmitButton' to make this Blue
             submitted = st.form_submit_button("Run Prediction", use_container_width=True)
     
     with c_sim2:
@@ -986,13 +994,36 @@ with tab6:
             prod_code = le_product.transform([prod_in])[0]
             
             # Predict
+            # The model uses the SLIDER value (r_in), which is now accurate to the country
             prob = model.predict_proba([[r_in, v_in, c_in, ctry_code, prod_code]])[0][1]
-            st.markdown("#### Prediction Result")
+            
+            st.markdown("#### 📊 Prediction Result")
+            
+            # Create a nice result card
             if prob > 0.5:
-                st.error(f"🛑 **HIGH RISK: {prob:.1%} Probability of Delay**")
-                st.info("Recommendation: Engage backup supplier or increase lead time buffer.")
+                st.markdown(f"""
+                    <div style="background-color: #ffebee; padding: 20px; border-radius: 10px; border-left: 5px solid #ff4444;">
+                        <h3 style="color: #cc0000; margin:0;">🛑 HIGH RISK</h3>
+                        <p style="font-size: 1.2rem; font-weight: bold; margin: 5px 0;">Probability of Delay: {prob:.1%}</p>
+                        <p style="color: #333;">The combination of <b>{country_in}</b> (Risk: {r_in}) and these order parameters suggests a high likelihood of disruption.</p>
+                        <hr>
+                        <b>Recommendation:</b> Engage backup supplier or increase lead time buffer.
+                    </div>
+                """, unsafe_allow_html=True)
             else:
-                st.success(f"✅ **LOW RISK: {prob:.1%} Probability of Delay**")
-                st.info("Recommendation: Proceed with standard procurement process.")
+                st.markdown(f"""
+                    <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 5px solid #00c851;">
+                        <h3 style="color: #007e33; margin:0;">✅ LOW RISK</h3>
+                        <p style="font-size: 1.2rem; font-weight: bold; margin: 5px 0;">Probability of Delay: {prob:.1%}</p>
+                        <p style="color: #333;">Conditions in <b>{country_in}</b> appear stable for this order size.</p>
+                        <hr>
+                        <b>Recommendation:</b> Proceed with standard procurement process.
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            # Feature Explanation (Optional: Shows why)
+            st.caption(f"Model Inputs: Risk={r_in}, Value=${v_in:,}, Cap={c_in}%")
+            
         else:
-            st.info("👈 Enter parameters and click 'Run Prediction' to see AI analysis.")
+            # Placeholder before they click run
+            st.info(f"👈 Current Average Risk for **{country_in}** is **{current_risk_avg}**. Click 'Run Prediction' to analyze.")

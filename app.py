@@ -965,7 +965,7 @@ with tab6:
     
     c_sim1, c_sim2 = st.columns([1, 2])
     with c_sim1:
-        st.markdown("Select Context")
+        # st.markdown("Select Country")
         country_in = st.selectbox("Origin Country", sorted(df['Country'].unique()))
         prod_in = st.selectbox("Product Type", sorted(df['Product'].unique()))
 
@@ -976,7 +976,7 @@ with tab6:
         # (Optional: You could also adjust defaults based on product, but Country is key for Risk Index)
 
         with st.form("sim_form"):
-            st.markdown("Adjust Parameters") 
+            # st.markdown("Adjust Parameters") 
             
             # The Slider now defaults to 'current_risk_avg'
             # We use 'value=current_risk_avg' so it auto-updates!

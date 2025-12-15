@@ -796,7 +796,8 @@ with tab1:
     # 4. Remove margins so it fits tight
     fig_table.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
-        height=300 # Fixed height so you can scroll inside it
+        height=300,
+        paper_bgcolor='white'
     )
 
     st.plotly_chart(fig_table, use_container_width=True)
@@ -963,7 +964,7 @@ with tab2:
                 )
             )])
 
-            fig_fin.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=300)
+            fig_fin.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=300,paper_bgcolor='white')
             st.plotly_chart(fig_fin, use_container_width=True)
         else:
             st.success("✅ Financial Stability: No high-risk vendors detected in this filter.")
@@ -1156,7 +1157,8 @@ with tab3:
             # 4. Remove margins & set height
             fig_table.update_layout(
                 margin=dict(l=0, r=0, t=0, b=0),
-                height=300 # Fixed height for scrolling
+                height=300,
+                paper_bgcolor='white'
             )
 
             st.plotly_chart(fig_table, use_container_width=True)
@@ -1354,7 +1356,8 @@ with tab4:
             # 4. Remove margins & set height
             fig_table.update_layout(
                 margin=dict(l=0, r=0, t=0, b=0),
-                height=300
+                height=300,
+                paper_bgcolor='white'
             )
 
             st.plotly_chart(fig_table, use_container_width=True)
@@ -1527,7 +1530,8 @@ with tab5:
             # 4. Remove margins & set height
             fig_table.update_layout(
                 margin=dict(l=0, r=0, t=0, b=0),
-                height=300
+                height=300,
+                paper_bgcolor='white'
             )
 
             st.plotly_chart(fig_table, use_container_width=True)

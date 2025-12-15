@@ -247,15 +247,10 @@ def get_data():
         # else:
         #     mode = random.choice(['Sea', 'Air'])
         
-        land_capable_countries = [
-            'USA', 'Canada', 'Mexico', 'Panama', 'Costa Rica',
-            'Germany', 'France', 'Poland', 'Italy', 'Netherlands', 'Spain', 'Sweden'
-        ]
-        
-        if country in land_capable_countries:
+        if country in ['USA', 'Canada', 'Mexico', 'Panama', 'Costa Rica']:
             mode = random.choice(['Land', 'Air'])
         else:
-            # China, Brazil, India, etc. must be Sea or Air
+            # Europe, Asia, Africa, South America -> Sea or Air ONLY
             mode = random.choice(['Sea', 'Air'])
 
         # Risk Logic
@@ -457,11 +452,20 @@ with c_prod:
     available_products = sorted(temp_df['Product'].unique())
     sel_product = st.multiselect("Product", available_products, default=[])
 with c_f4:
-    # if sel_vendor: temp_df = temp_df[temp_df['Vendor'].isin(sel_vendor)]
+    temp_df_mode = df.copy()
+    if sel_region: 
+        temp_df_mode = temp_df_mode[temp_df_mode['Region'].isin(sel_region)]
+    if sel_country: 
+        temp_df_mode = temp_df_mode[temp_df_mode['Country'].isin(sel_country)]
+    if sel_vendor:
+        temp_df_mode = temp_df_mode[temp_df_mode['Vendor'].isin(sel_vendor)]
+    if sel_product:
+        temp_df_mode = temp_df_mode[temp_df_mode['Product'].isin(sel_product)]
 
-    # available_modes = sorted(temp_df['Shipment_Mode'].unique())
-    # sel_mode = st.multiselect("Mode", available_modes, default=[])
-    available_modes = sorted(df['Shipment_Mode'].unique())
+    # 2. Get modes ONLY from this filtered list
+    # If "China" is selected, this list will only contain ['Air', 'Sea']
+    available_modes = sorted(temp_df_mode['Shipment_Mode'].unique())
+    
     sel_mode = st.multiselect("Mode", available_modes, default=[])
 
 # Apply Filters

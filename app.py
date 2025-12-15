@@ -536,13 +536,13 @@ with tab1:
     drill_data = filtered_df.sort_values('Country_Risk_Index', ascending=False).head(15)
     
     # 2. Define Columns to Show
-    drill_cols = ['Order_ID', 'Product', 'Country', 'Risk_Reason_Geo', 'Shipment_Mode', 'Country_Risk_Index']
+    drill_cols = ['Order_ID', 'Product', 'Country', 'Vendor','Risk_Reason_Geo', 'Climate_Zone_Detail','Shipment_Mode', 'Country_Risk_Index']
     
     # 3. Create Plotly Table (The "Rich" Interactive Table)
     import plotly.graph_objects as go
 
     fig_table = go.Figure(data=[go.Table(
-        columnorder = [0, 1, 2, 3, 4, 5],
+        columnorder = [0, 1, 2, 3, 4, 5, 6, 7],
         columnwidth = [80, 100, 80, 120, 80, 80], # Adjust width of columns
         
         header=dict(

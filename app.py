@@ -305,14 +305,14 @@ def get_data():
         risk_idx = int(base_risk + country_variance + np.random.normal(0, 5))
         risk_idx = max(0, min(100, risk_idx))
 
-        cap_util = int(np.random.normal(70, 15))
+        cap_util = int(np.random.normal(60, 12))
         cap_util = max(0, min(100, cap_util))
         val = random.randint(5000, 500000)
 
         # --- CUMULATIVE PROBABILITY (Updated with Product Risk) ---
         prob_late = 0.05
         if risk_idx > 60: prob_late += 0.30   # High Country Risk
-        if cap_util > 85: prob_late += 0.25   # Factory Overload
+        if cap_util > 85: prob_late += 0.60   # Factory Overload
         if val > 200000: prob_late += 0.05    # High Value
         if mode == 'Sea': prob_late += 0.10   # Slow Mode
 

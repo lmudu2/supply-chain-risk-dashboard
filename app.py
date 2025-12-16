@@ -64,6 +64,41 @@ st.markdown("""
         h1, h2, h3, h4, p, span, div, label {
             color: #000000 !important;
         }
+        div[data-testid="stExpander"] {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #d0d0d0 !important;
+        }
+        
+        /* 2. Force the details and summary background to White */
+        div[data-testid="stExpander"] details,
+        div[data-testid="stExpander"] summary {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* 3. Handle Hover State (Light Grey background, Black text) */
+        div[data-testid="stExpander"] summary:hover {
+            background-color: #f0f0f0 !important;
+            color: #000000 !important;
+        }
+
+        /* 4. Force the Question Text ("How are these...") to be Black */
+        div[data-testid="stExpander"] summary span, 
+        div[data-testid="stExpander"] summary p {
+            color: #000000 !important;
+        }
+
+        /* 5. Force the Arrow Icon to be Black */
+        div[data-testid="stExpander"] summary svg {
+            fill: #000000 !important;
+            color: #000000 !important;
+        }
+
+        /* 6. Force the Content inside to be Black */
+        div[data-testid="stExpander"] div {
+            color: #000000 !important;
+        }
 
         /* Hide Sidebar */
         section[data-testid="stSidebar"] { display: none; }

@@ -115,6 +115,11 @@ st.markdown("""
         input[type="number"], div[data-baseweb="select"] span {
             color: #000000 !important;
         }
+        [data-testid="stDownloadButton"] button {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #000000 !important;
+        }
 
         /* --- 2. FORCE SUBMIT BUTTON TO WHITE/BLACK --- */
         /* Target the actual button element inside the Streamlit form button container */
@@ -594,8 +599,8 @@ if filtered_df.empty:
 # st.divider()
 
 # --- 4. MAIN TABS ---
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🌍 External Risk", "💰 Financial", "⚙️ Ops Performance", "✅ Quality & ESG", "🤝 Relationship", "🤖 Risk Simulator"
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "🌍 External Risk", "💰 Financial", "⚙️ Ops Performance", "✅ Quality & ESG", "🤝 Relationship", "🤖 Risk Simulator", "📥 Data Export"
 ])
 
 # === TAB 1: EXTERNAL ===
@@ -1614,6 +1619,37 @@ with tab6:
         else:
             # Placeholder before they click run
             st.info(f"👈 Current Average Risk for **{country_in}** is **{current_risk_avg}**. Click 'Run Prediction' to analyze.")
+
+with tab7:
+    st.markdown("Source Data & Export")
+    st.caption("Preview of the first 100 rows. Use the download button for the full dataset.")
+
+    # Convert dataframe to Plotly Table to ensure white background consistency
+    preview_df = filtered_df.head(100)
+    
+    fig_preview = go.Figure(data=[go.Table(
+        header=dict(
+            values=[f"<b>{c}</b>" for c in preview_df.columns],
+            line_color='black', fill_color='white', align='left',
+            font=dict(color='black', size=11, family="Arial Black"), height=30
+        ),
+        cells=dict(
+            values=[preview_df[k].tolist() for k in preview_df.columns],
+            line_color='black', fill_color='white', align='left',
+            font=dict(color='black', size=11), height=25
+        )
+    )])
+    fig_preview.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=400, paper_bgcolor='white', font=dict(color='black'))
+    st.plotly_chart(fig_preview, use_container_width=True)
+
+    # CSV Download Logic
+    csv = filtered_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Download Full Data as CSV",
+        data=csv,
+        file_name='supply_chain_risk_data.csv',
+        mime='text/csv',
+    )
 with st.expander("How are these metrics calculated?"):
     st.markdown("""
     ### External Risk

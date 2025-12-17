@@ -343,6 +343,10 @@ def get_data():
         cap_util = int(np.random.normal(60, 12))
         cap_util = max(0, min(100, cap_util))
         val = random.randint(5000, 500000)
+        
+        # --- 5. RELATIONSHIP METRICS (Defined BEFORE Risk Calc) ---
+        collab_score = round(random.uniform(1, 10), 1)
+        rel_reason = random.choice(rel_reasons) if collab_score < 4.0 else "Good Standing"
 
         # --- CUMULATIVE PROBABILITY (Updated with Product Risk) ---
         prob_late = 0.05
@@ -350,6 +354,9 @@ def get_data():
         if cap_util > 85: prob_late += 0.60   # Factory Overload
         if val > 200000: prob_late += 0.05    # High Value
         if mode == 'Sea': prob_late += 0.10   # Slow Mode
+
+        # ADD RELATIONSHIP BUFFER (The "Safety Net")
+        if collab_score > 8.0: prob_late -= 0.20
 
         # ADD PRODUCT RISK
         # prob_late += product_risk_map[product]
@@ -405,9 +412,7 @@ def get_data():
         # --- 4. COMPLIANCE STATUS ---
         compliance_status = 'Fail' if random.random() < 0.02 else 'Pass'
 
-        # --- 5. RELATIONSHIP METRICS ---
-        collab_score = round(random.uniform(1, 10), 1)
-        rel_reason = random.choice(rel_reasons) if collab_score < 4.0 else "Good Standing"
+
 
 
         rows.append({
@@ -459,7 +464,7 @@ def get_data():
     df['Product_Code'] = le_product.fit_transform(df['Product'])
 
     # Train Model (Now using Product Code!)
-    features = ['Country_Risk_Index', 'Order_Value_USD', 'Capacity_Utilization', 'Country_Code', 'Product_Code']
+    features = ['Country_Risk_Index', 'Order_Value_USD', 'Capacity_Utilization', 'Country_Code', 'Product_Code', 'Collaboration_Index']
     clf = RandomForestClassifier(n_estimators=50, max_depth=7).fit(df[features], df['Is_Late'])
 
     return df, clf, le_country, le_product
@@ -1611,6 +1616,7 @@ with tab6:
 
             v_in = st.number_input("Order Value ($)", min_value=10000, max_value=1000000, value=50000)
             c_in = st.slider("Factory Capacity Utilization (%)", 0, 100, 85)
+            rel_in = st.slider("Relationship Score (1-10)", 1.0, 10.0, 5.0)
 
             submitted = st.form_submit_button("Run Prediction", use_container_width=True)
 
@@ -1622,7 +1628,7 @@ with tab6:
 
             # Predict
             # The model uses the SLIDER value (r_in), which is now accurate to the country
-            prob = model.predict_proba([[r_in, v_in, c_in, ctry_code, prod_code]])[0][1]
+            prob = model.predict_proba([[r_in, v_in, c_in, ctry_code, prod_code, rel_in]])[0][1]
 
             st.markdown("#### 📊 Prediction Result")
 

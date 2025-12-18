@@ -639,12 +639,12 @@ if filtered_df.empty:
 # st.divider()
 
 # --- 4. MAIN TABS ---
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "🌍 External Risk", "💰 Financial", "⚙️ Ops Performance", "✅ Quality & ESG", "🤝 Relationship", "🤖 Risk Simulator", "📥 Data Export"
+tab_data, tab_ext, tab_fin, tab_ops, tab_qual, tab_rel, tab_sim = st.tabs([
+    "📥 Data Export", "🌍 External Risk", "💰 Financial", "⚙️ Ops Performance", "✅ Quality & ESG", "🤝 Relationship", "🤖 Risk Simulator"
 ])
 
 # === TAB 1: EXTERNAL ===
-with tab1:
+with tab_ext:
     st.markdown("External & Geopolitical Risk")
     k1, k2, k3 = st.columns(3)
 
@@ -850,7 +850,7 @@ with tab1:
     # st.dataframe(high_risk_orders[['Order_ID', 'Product', 'Country', 'Region', 'Risk_Reason_Geo', 'Climate_Zone_Detail', 'Country_Risk_Index']].head(10), hide_index=True, use_container_width=True)
 
 # === TAB 2: FINANCIAL (Detailed) ===
-with tab2:
+with tab_fin:
     st.markdown("Financial Health")
     k1, k2, k3 = st.columns(3)
 
@@ -1016,7 +1016,7 @@ with tab2:
 
 
 # === TAB 3: OPS (Detailed) ===
-with tab3:
+with tab_ops:
     st.markdown("Operational Performance")
     k1, k2, k3, k4 = st.columns(4)
 
@@ -1211,7 +1211,7 @@ with tab3:
         else:
             st.info("✅ All orders are On Time in this view.")
 # === TAB 4: QUALITY (Detailed) ===
-with tab4:
+with tab_qual:
     st.markdown("Quality & Compliance")
     k1, k2, k3, k4 = st.columns(4)
 
@@ -1410,7 +1410,7 @@ with tab4:
         else:
             st.info("✅ No Quality or Compliance issues found.")
 # === TAB 5: RELATIONSHIP (Detailed) ===
-with tab5:
+with tab_rel:
     st.markdown("Relationship & Responsiveness")
     k1, k2, k3 = st.columns(3)
 
@@ -1585,7 +1585,7 @@ with tab5:
             st.info("✅ All supplier relationships are in good standing.")
 # === TAB 6: SIMULATOR (Includes Product Selection) ===
 # === TAB 6: SIMULATOR (Smart Update) ===
-with tab6:
+with tab_sim:
     st.markdown("### 🤖 Risk Simulator")
     st.caption("Predict supply chain disruption probability for new orders.")
 
@@ -1661,7 +1661,7 @@ with tab6:
             # Placeholder before they click run
             st.info(f"👈 Current Average Risk for **{country_in}** is **{current_risk_avg}**. Click 'Run Prediction' to analyze.")
 
-with tab7:
+with tab_data:
     st.markdown("Source Data & Export")
     st.caption("Preview of the first 100 rows. Use the download button for the full dataset.")
 

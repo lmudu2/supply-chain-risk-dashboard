@@ -638,7 +638,69 @@ if filtered_df.empty:
 
 # st.divider()
 
-# --- 4. MAIN TABS ---
+# --- 4. CALCULATE AGGREGATE RISK IMPACTS (For Tabs) ---
+# We calculate the *Average Marginal Contribution* of each factor to the Probability of Delay
+# for the currently filtered entries.
+
+if len(filtered_df) > 0:
+    # 1. Prepare Data Matrix (X)
+    X_curr = filtered_df[['Country_Risk_Index', 'Order_Value_USD', 'Capacity_Utilization', 'Country_Code', 'Product_Code', 'Collaboration_Index']]
+    
+    # 2. Get Baseline Probabilities
+    probs_curr = model.predict_proba(X_curr)[:, 1]
+    
+    # 3. Calculate "Safe" Probabilities for each factor
+    
+    # External (Geo) -> Set Risk to 20
+    X_safe_geo = X_curr.copy()
+    X_safe_geo['Country_Risk_Index'] = 20
+    probs_safe_geo = model.predict_proba(X_safe_geo)[:, 1]
+    impact_geo_list = np.maximum(0, probs_curr - probs_safe_geo)
+    avg_geo_impact = impact_geo_list.mean()
+
+    # Financial -> Set Value to 10k
+    X_safe_fin = X_curr.copy()
+    X_safe_fin['Order_Value_USD'] = 10000
+    probs_safe_fin = model.predict_proba(X_safe_fin)[:, 1]
+    impact_fin_list = np.maximum(0, probs_curr - probs_safe_fin)
+    avg_fin_impact = impact_fin_list.mean()
+
+    # Ops -> Set Cap Util to 50%
+    X_safe_ops = X_curr.copy()
+    X_safe_ops['Capacity_Utilization'] = 50
+    probs_safe_ops = model.predict_proba(X_safe_ops)[:, 1]
+    impact_ops_list = np.maximum(0, probs_curr - probs_safe_ops)
+    avg_ops_impact = impact_ops_list.mean()
+
+    # Rel -> Set Collab to 9.0
+    X_safe_rel = X_curr.copy()
+    X_safe_rel['Collaboration_Index'] = 9.0
+    probs_safe_rel = model.predict_proba(X_safe_rel)[:, 1]
+    impact_rel_list = np.maximum(0, probs_curr - probs_safe_rel)
+    avg_rel_impact = impact_rel_list.mean()
+
+    # Qual (Product Complexity) -> Set Product to 'Textiles' (or code 0 if not found)
+    # Ideally find encoding for 'Textiles'
+    try:
+        safe_prod_code = le_product.transform(['Textiles'])[0]
+    except:
+        safe_prod_code = 0 # Fallback
+        
+    X_safe_qual = X_curr.copy()
+    X_safe_qual['Product_Code'] = safe_prod_code
+    probs_safe_qual = model.predict_proba(X_safe_qual)[:, 1]
+    impact_qual_list = np.maximum(0, probs_curr - probs_safe_qual)
+    avg_qual_impact = impact_qual_list.mean()
+
+else:
+    avg_geo_impact = 0
+    avg_fin_impact = 0
+    avg_ops_impact = 0
+    avg_rel_impact = 0
+    avg_qual_impact = 0
+
+
+# --- 5. MAIN TABS ---
 tab_data, tab_ext, tab_fin, tab_ops, tab_qual, tab_rel, tab_sim = st.tabs([
     "📥 Data Export", "🌍 External Risk", "💰 Financial", "⚙️ Ops Performance", "✅ Quality & ESG", "🤝 Relationship", "🤖 Risk Simulator"
 ])
@@ -646,6 +708,18 @@ tab_data, tab_ext, tab_fin, tab_ops, tab_qual, tab_rel, tab_sim = st.tabs([
 # === TAB 1: EXTERNAL ===
 with tab_ext:
     st.markdown("External & Geopolitical Risk")
+    
+    # Display Risk Probability
+    # Display Risk Probability
+    st.markdown(f"""
+        <div style="background-color: #e3f2fd; padding: 10px; border-radius: 8px; border-left: 5px solid #2196f3; margin-bottom: 10px;">
+            <h5 style="margin:0; color: #0d47a1; font-size: 1rem;">🌐 Geopolitical Delay Probability: {avg_geo_impact:.1%}</h5>
+            <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                Based on current selection, external factors (Instability, Climate) are increasing the probability of delay by <b>{avg_geo_impact:.1%}</b>.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
     k1, k2, k3 = st.columns(3)
 
     avg_risk = filtered_df['Country_Risk_Index'].mean()
@@ -852,6 +926,53 @@ with tab_ext:
 # === TAB 2: FINANCIAL (Detailed) ===
 with tab_fin:
     st.markdown("Financial Health")
+
+    # Display Risk Probability with Simulation
+    sim_col1, sim_col2 = st.columns([1, 2])
+    with sim_col1:
+        # st.markdown("**Simulate Scenario**")
+        # Default to 50k (baseline)
+        sim_val_input = st.number_input("Set Order Value ($)", min_value=10000, max_value=2000000, value=50000, step=10000, key='fin_sim_input')
+    
+    with sim_col2:
+        # Calculate Simulated Risk
+        if len(filtered_df) > 0:
+            X_sim = X_curr.copy()
+            # Set Order Value to Input
+            X_sim['Order_Value_USD'] = sim_val_input
+            
+            probs_sim = model.predict_proba(X_sim)[:, 1]
+            
+            # Re-calculate contribution vs Safe Baseline
+            impact_fin_sim_list = np.maximum(0, probs_sim - probs_safe_fin)
+            avg_fin_impact_sim = impact_fin_sim_list.mean()
+            
+            delta_risk = avg_fin_impact_sim - avg_fin_impact
+            
+            delta_color = "#d84315" if delta_risk > 0 else "#2e7d32" # Red if higher, Green if lower
+            sign = "+" if delta_risk > 0 else ""
+
+            st.markdown(f"""
+                <div style="background-color: #fff3e0; padding: 10px; border-radius: 8px; border-left: 5px solid #ff9800; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h5 style="margin:0; color: #e65100; font-size: 1rem;">💰 Financial Delay Probability: {avg_fin_impact:.1%} → <b>{avg_fin_impact_sim:.1%}</b></h5>
+                        <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                            Setting all orders to <b>${sim_val_input:,}</b> changes delay risk by <span style="color: {delta_color}; font-weight: bold;">{sign}{delta_risk:.1%}</span>.
+                        </p>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Default Static View
+            st.markdown(f"""
+                <div style="background-color: #fff3e0; padding: 10px; border-radius: 8px; border-left: 5px solid #ff9800; margin-bottom: 10px;">
+                    <h5 style="margin:0; color: #e65100; font-size: 1rem;">💰 Financial Delay Probability: {avg_fin_impact:.1%}</h5>
+                    <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                        High order values and supplier financial instability are increasing delay risk by <b>{avg_fin_impact:.1%}</b>.
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+
     k1, k2, k3 = st.columns(3)
 
     bad_credit_df = filtered_df[filtered_df['Supplier_Credit_Rating'].isin(['C', 'CC', 'CCC'])] # Added CCC for completeness
@@ -1018,6 +1139,42 @@ with tab_fin:
 # === TAB 3: OPS (Detailed) ===
 with tab_ops:
     st.markdown("Operational Performance")
+    
+    # Display Risk Probability with Simulation
+    sim_col1, sim_col2 = st.columns([1, 2])
+    with sim_col1:
+        # st.markdown("**Simulate Scenario**")
+        sim_ops_input = st.slider("Set Factory Capacity (%)", 50, 100, 80, step=5, key='ops_sim_slider')
+
+    with sim_col2:
+        # Calculate Simulated Risk
+        if len(filtered_df) > 0:
+            X_sim = X_curr.copy()
+            # Set Capacity to Input
+            X_sim['Capacity_Utilization'] = sim_ops_input
+            
+            probs_sim = model.predict_proba(X_sim)[:, 1]
+            
+            # Re-calculate contribution vs Safe Baseline (safe_ops is 50%)
+            impact_ops_sim_list = np.maximum(0, probs_sim - probs_safe_ops)
+            avg_ops_impact_sim = impact_ops_sim_list.mean()
+            
+            delta_risk = avg_ops_impact_sim - avg_ops_impact
+            
+            delta_color = "#d84315" if delta_risk > 0 else "#2e7d32"
+            sign = "+" if delta_risk > 0 else ""
+
+            st.markdown(f"""
+                <div style="background-color: #f3e5f5; padding: 10px; border-radius: 8px; border-left: 5px solid #9c27b0; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h5 style="margin:0; color: #4a148c; font-size: 1rem;">⚙️ Operational Delay Probability: {avg_ops_impact:.1%} → <b>{avg_ops_impact_sim:.1%}</b></h5>
+                        <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                            Setting factory strain to <b>{sim_ops_input}%</b> changes delay risk by <span style="color: {delta_color}; font-weight: bold;">{sign}{delta_risk:.1%}</span>.
+                        </p>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
     k1, k2, k3, k4 = st.columns(4)
 
     late_df = filtered_df[filtered_df['Is_Late'] == 1]
@@ -1213,6 +1370,53 @@ with tab_ops:
 # === TAB 4: QUALITY (Detailed) ===
 with tab_qual:
     st.markdown("Quality & Compliance")
+    
+    # Display Risk Probability with Simulation
+    sim_col1, sim_col2 = st.columns([1, 2])
+    with sim_col1:
+        # st.markdown("**Simulate Product Switch**")
+        # Get list of products
+        all_prods = sorted(df['Product'].unique())
+        # Default to the first one or 'Textiles' if available
+        default_idx = all_prods.index('Textiles') if 'Textiles' in all_prods else 0
+        sim_prod_input = st.selectbox("Select Product to Simulate", all_prods, index=default_idx, key='qual_sim_select')
+
+    with sim_col2:
+        # Calculate Simulated Risk
+        if len(filtered_df) > 0:
+            X_sim = X_curr.copy()
+            
+            # Encode Selected Product
+            try:
+                sim_prod_code = le_product.transform([sim_prod_input])[0]
+            except:
+                sim_prod_code = 0
+            
+            # Set Product Code
+            X_sim['Product_Code'] = sim_prod_code
+            
+            probs_sim = model.predict_proba(X_sim)[:, 1]
+            
+            # Re-calculate contribution vs Safe Baseline (safe_qual is based on Textiles/0)
+            impact_qual_sim_list = np.maximum(0, probs_sim - probs_safe_qual)
+            avg_qual_impact_sim = impact_qual_sim_list.mean()
+            
+            delta_risk = avg_qual_impact_sim - avg_qual_impact
+            
+            delta_color = "#d84315" if delta_risk > 0 else "#2e7d32"
+            sign = "+" if delta_risk > 0 else ""
+
+            st.markdown(f"""
+                <div style="background-color: #e0f2f1; padding: 10px; border-radius: 8px; border-left: 5px solid #009688; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h5 style="margin:0; color: #00695c; font-size: 1rem;">✅ Quality Delay Probability: {avg_qual_impact:.1%} → <b>{avg_qual_impact_sim:.1%}</b></h5>
+                        <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                            Switching to <b>{sim_prod_input}</b> changes inherent risk by <span style="color: {delta_color}; font-weight: bold;">{sign}{delta_risk:.1%}</span>.
+                        </p>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
     k1, k2, k3, k4 = st.columns(4)
 
     # defect_df = filtered_df[filtered_df['Defect_Flag'] == 1]
@@ -1412,6 +1616,42 @@ with tab_qual:
 # === TAB 5: RELATIONSHIP (Detailed) ===
 with tab_rel:
     st.markdown("Relationship & Responsiveness")
+
+    # Display Risk Probability with Simulation
+    sim_col1, sim_col2 = st.columns([1, 2])
+    with sim_col1:
+        # st.markdown("**Simulate Improvement**")
+        sim_rel_input = st.slider("Improve Relationship Score", 1.0, 10.0, 5.0, step=0.5, key='rel_sim_slider')
+
+    with sim_col2:
+        # Calculate Simulated Risk
+        if len(filtered_df) > 0:
+            X_sim = X_curr.copy()
+            # Set Relationship Score
+            X_sim['Collaboration_Index'] = sim_rel_input
+            
+            probs_sim = model.predict_proba(X_sim)[:, 1]
+            
+            # Re-calculate contribution vs Safe Baseline (safe_rel is 9.0)
+            impact_rel_sim_list = np.maximum(0, probs_sim - probs_safe_rel)
+            avg_rel_impact_sim = impact_rel_sim_list.mean()
+            
+            delta_risk = avg_rel_impact_sim - avg_rel_impact
+            
+            delta_color = "#d84315" if delta_risk > 0 else "#2e7d32"
+            sign = "+" if delta_risk > 0 else ""
+
+            st.markdown(f"""
+                <div style="background-color: #e8f5e9; padding: 10px; border-radius: 8px; border-left: 5px solid #4caf50; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h5 style="margin:0; color: #1b5e20; font-size: 1rem;">🤝 Relationship Friction Risk: {avg_rel_impact:.1%} → <b>{avg_rel_impact_sim:.1%}</b></h5>
+                        <p style="margin:2px 0 0 0; color: #333; font-size: 0.8rem;">
+                            Improving Relationship Score to <b>{sim_rel_input}</b> changes risk by <span style="color: {delta_color}; font-weight: bold;">{sign}{delta_risk:.1%}</span>.
+                        </p>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
     k1, k2, k3 = st.columns(3)
 
     friction_df = filtered_df[filtered_df['Collaboration_Index'] < 4.0]

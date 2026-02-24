@@ -5,6 +5,7 @@ A comprehensive AI-powered dashboard for monitoring, analyzing, and predicting s
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-ff4b4b)
 ![License](https://img.shields.io/badge/License-MIT-green)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lmudu2/supply-chain-risk-dashboard/blob/main/Open_in_Colab.ipynb)
 
 ## 📖 Overview
 

@@ -3,10 +3,9 @@
 A comprehensive AI-powered dashboard for monitoring, analyzing, and predicting supply chain risks. This application leverages machine learning to predict shipment delays and provides insights into Geopolitical, Financial, Operational, and Quality risks across a global supply network.
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-ff4b4b)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://supply-chain-risk-dashboard-nluw2ynjx5bp3irnfofhxg.streamlit.app)
 ![License](https://img.shields.io/badge/License-MIT-green)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lmudu2/supply-chain-risk-dashboard/blob/main/Open_in_Colab.ipynb)
-
 ## 📖 Overview
 
 Supply Chain Risk Analytics is built with **Streamlit** and uses a **Random Forest Classifier** to analyze likelihood of shipment delays. It simulates a global dataset of suppliers, products, and logistics routes to demonstrate how various risk factors intersect to impact supply chain resilience.

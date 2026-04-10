@@ -927,6 +927,15 @@ with tab_ext:
 with tab_fin:
     st.markdown("Financial Health")
 
+    with st.expander("Understanding Credit Ratings (AAA to C)"):
+        st.markdown("""
+        **What do these ratings mean for our supply chain?**
+        
+        *   **🟢 AAA / AA / A (Prime):** Financially rock-solid. Near zero risk of default.
+        *   **🟡 BBB / BB / B (Speculative):** Stable for now, but vulnerable to economic shifts. 
+        *   **🔴 CCC / CC / C (In Distress):** High risk of bankruptcy. Potential for sudden factory closures or missed shipments.
+        """)
+
     # Display Risk Probability with Simulation
     sim_col1, sim_col2 = st.columns([1, 2])
     with sim_col1:
@@ -1084,56 +1093,66 @@ with tab_fin:
 
     with c2:
 
-        st.markdown("Top 10 High-Risk Vendor Watchlist")
+        # st.markdown("Top 10 High-Risk Vendor Watchlist")
         # st.dataframe(bad_credit_df[['Vendor', 'Country', 'Product', 'Financial_Risk_Reason', 'DPO_Impact_Days']].head(10), hide_index=True, use_container_width=True)
-        # st.markdown("Affected Products & Locations") # UPDATED HEADER
         watchlist_cols = ['Vendor', 'Product', 'Supplier_Credit_Rating', 'Financial_Risk_Reason', 'DPO_Impact_Days']
         display_cols = ['Vendor', 'Product', 'Rating', 'Main Issue', 'Days to Pay']
 
-        # 2. FILTER DATA (Risky Suppliers Only)
-        # We save this into 'financial_risk_df' (NOT 'table_data')
-        financial_risk_df = filtered_df[
-            filtered_df['Supplier_Credit_Rating'].isin(['C', 'CC', 'CCC', 'BB'])
-        ].sort_values(by='Order_Value_USD', ascending=False).head(10)
+        import plotly.graph_objects as go
 
-        if not financial_risk_df.empty:
-            # 3. PREPARE TABLE VALUES
-            # We must use 'financial_risk_df' here because 'table_data' does not exist in this tab
-            table_values = [financial_risk_df[col] for col in watchlist_cols]
+        # --- 1. HIGH RISK WATCHLIST (Top 5 C/CC/CCC) ---
+        st.markdown("**Top 5 High-Risk Vendor Watchlist**")
+        high_risk_df = filtered_df[
+            filtered_df['Supplier_Credit_Rating'].isin(['C', 'CC', 'CCC'])
+        ].sort_values(by='Order_Value_USD', ascending=False).head(5)
 
-            import plotly.graph_objects as go
-
-            fig_fin = go.Figure(data=[go.Table(
+        if not high_risk_df.empty:
+            fig_high = go.Figure(data=[go.Table(
                 columnorder=[0, 1, 2, 3, 4],
                 columnwidth=[100, 100, 60, 120, 80],
-
                 header=dict(
                     values=[f"<b>{c}</b>" for c in display_cols],
                     line_color='black', fill_color='white', align='left',
                     font=dict(color='black', size=12, family="Arial Black"), height=30
                 ),
-
                 cells=dict(
-                    values=table_values,
+                    values=[high_risk_df[col] for col in watchlist_cols],
                     line_color='black', fill_color='white', align='left',
                     font=dict(color='black', size=12), height=25,
-                    
-                    # 4. COLOR LOGIC
-                    # We reference 'financial_risk_df' here to avoid the NameError
-                    font_color=[
-                        'black', # Vendor
-                        'black', # Product
-                        ['red' if 'C' in x else 'black' for x in financial_risk_df['Supplier_Credit_Rating']],
-                        'black', # Reason
-                        'black'  # DPO
-                    ]
+                    font_color=['black', 'black', 'red', 'black', 'black']
                 )
             )])
-
-            fig_fin.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=300,paper_bgcolor='white')
-            st.plotly_chart(fig_fin, use_container_width=True)
+            fig_high.update_layout(margin=dict(l=0, r=0, t=0, b=10), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_high, key="high_risk_table")
         else:
-            st.success("✅ Financial Stability: No high-risk vendors detected in this filter.")
+            st.success("✅ No high-risk (C/CC/CCC) vendors detected.")
+
+        # --- 2. LOW RISK WATCHLIST (Top 5 AAA) ---
+        st.markdown("**Top 5 Low-Risk / No-Risk Vendor Watchlist**")
+        low_risk_df = filtered_df[
+            filtered_df['Supplier_Credit_Rating'] == 'AAA'
+        ].sort_values(by='Order_Value_USD', ascending=False).head(5)
+
+        if not low_risk_df.empty:
+            fig_low = go.Figure(data=[go.Table(
+                columnorder=[0, 1, 2, 3, 4],
+                columnwidth=[100, 100, 60, 120, 80],
+                header=dict(
+                    values=[f"<b>{c}</b>" for c in display_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
+                ),
+                cells=dict(
+                    values=[low_risk_df[col] for col in watchlist_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'green', 'black', 'black']
+                )
+            )])
+            fig_low.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_low, key="low_risk_table")
+        else:
+            st.info("ℹ️ No AAA-rated vendors found in this selection.")
 
 
 # === TAB 3: OPS (Detailed) ===

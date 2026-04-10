@@ -430,7 +430,8 @@ def get_data():
             # Fin
             'Supplier_Credit_Rating': credit,
             'Financial_Risk_Reason': fin_reason,
-            'DPO_Impact_Days': np.random.randint(30, 90),
+            # DPO logic: High credit = Lower DPO (faster payment/healthy relationship)
+            'DPO_Impact_Days': np.random.randint(30, 45) if credit == 'AAA' else (np.random.randint(70, 90) if credit in ['C', 'CC', 'CCC'] else np.random.randint(45, 70)),
             'Cost_Competitiveness': int(np.random.normal(100, 5)),
 
             # Ops
@@ -1339,53 +1340,63 @@ with tab_ops:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Top 10 Late Orders")
-        drill_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Delay_Root_Cause', 'Delay_Days']
+        # --- 1. CRITICAL DELAYS (The "Bad" list) ---
+        st.markdown("**Top 5 Late Orders**")
+        ops_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Delay_Root_Cause', 'Delay_Days']
 
         if not late_df.empty:
-            # 2. Prepare Data (Top 15 for scrolling)
-            table_data = late_df[drill_cols]\
+            table_data_late = late_df[ops_cols]\
                 .sort_values('Delay_Days', ascending=False)\
-                .head(10)
+                .head(5)
 
-            # 3. Create Plotly Table
             import plotly.graph_objects as go
-
-            fig_table = go.Figure(data=[go.Table(
+            fig_late = go.Figure(data=[go.Table(
                 columnorder = [0, 1, 2, 3, 4, 5],
-                # Adjust column widths (give Vendor and Reason more space)
                 columnwidth = [80, 80, 70, 110, 110, 60],
-
                 header=dict(
-                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in drill_cols], # Bold Headers
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12, family="Arial Black"), # Black Text
-                    height=30
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in ops_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
                 ),
-
                 cells=dict(
-                    values=[table_data[k] for k in drill_cols],
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12), # Black Text
-                    height=25
+                    values=[table_data_late[k] for k in ops_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'black', 'black', 'black', 'red']
                 )
             )])
-
-            # 4. Remove margins & set height
-            fig_table.update_layout(
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=300,
-                paper_bgcolor='white'
-            )
-
-            st.plotly_chart(fig_table, use_container_width=True)
-
+            fig_late.update_layout(margin=dict(l=0, r=0, t=0, b=10), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_late, use_container_width=True, key="ops_late_table")
         else:
-            st.info("✅ All orders are On Time in this view.")
+            st.success("✅ No critical delays in current selection.")
+
+        # --- 2. RELIABLE DELIVERIES (The "Good" list) ---
+        st.markdown("**Top 5 on time**")
+        on_time_df = filtered_df[filtered_df['Is_Late'] == 0]
+
+        if not on_time_df.empty:
+            table_data_ot = on_time_df.sort_values('Order_Value_USD', ascending=False)\
+                .head(5)[ops_cols]
+
+            fig_ot = go.Figure(data=[go.Table(
+                columnorder = [0, 1, 2, 3, 4, 5],
+                columnwidth = [80, 80, 70, 110, 110, 60],
+                header=dict(
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in ops_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
+                ),
+                cells=dict(
+                    values=[table_data_ot[k] for k in ops_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'black', 'black', 'black', 'green']
+                )
+            )])
+            fig_ot.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_ot, use_container_width=True, key="ops_ot_table")
+        else:
+            st.info("ℹ️ No on-time deliveries found for selection.")
 # === TAB 4: QUALITY (Detailed) ===
 with tab_qual:
     st.markdown("Quality & Compliance")
@@ -1563,10 +1574,9 @@ with tab_qual:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Top 10 Defect & Compliance Log")
-        
-        drill_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Defect_Root_Cause', 'Regulatory_Compliance']
-        display_names = ['Order ID', 'Product', 'Country', 'Vendor', 'Defect', 'Compliance']
+        # --- 1. QUALITY & COMPLIANCE ISSUES (The "Bad" list) ---
+        st.markdown("**Top 5 Defect & Compliance Log**")
+        qual_cols = ['Order_ID', 'Product', 'Country', 'Vendor', 'Defect_Root_Cause', 'Regulatory_Compliance']
         
         quality_issues_df = filtered_df[
             (filtered_df['Defect_Flag'] == 1) | 
@@ -1574,64 +1584,67 @@ with tab_qual:
         ].copy()
 
         if not quality_issues_df.empty:
-            # 3. SMART LOGIC FUNCTION (The Fix)
             def determine_issue(row):
-                # If the text says "Perfect" BUT Compliance Failed -> It is actually a Regulatory Failure
                 if row['Defect_Root_Cause'] == "Perfect" and row['Regulatory_Compliance'] == 'Fail':
-                    return "Regulatory Failure"
-                
-                # Otherwise, show the actual defect (e.g., "Impurity Found")
+                    return "Reg Failure"
                 return row['Defect_Root_Cause']
 
-            # 4. APPLY LOGIC (Creates the new column)
             quality_issues_df['Primary_Issue'] = quality_issues_df.apply(determine_issue, axis=1)
-
-            # 5. SORT: Fails first
-            table_data = quality_issues_df.sort_values(
+            table_data_qual = quality_issues_df.sort_values(
                 by=['Regulatory_Compliance', 'Defect_Flag'], 
                 ascending=[True, False]
-            ).head(10)
+            ).head(5)
 
-            table_data_display = table_data[drill_cols]
-
-            # 3. Create Plotly Table
             import plotly.graph_objects as go
-
-            fig_table = go.Figure(data=[go.Table(
+            fig_qual_bad = go.Figure(data=[go.Table(
                 columnorder = [0, 1, 2, 3, 4, 5],
-                # Adjust widths: give more space to Vendor and Root Cause
                 columnwidth = [80, 80, 70, 110, 110, 90],
-
                 header=dict(
-                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in drill_cols], # Bold Headers
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12, family="Arial Black"), # Black Text
-                    height=30
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in qual_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
                 ),
-
                 cells=dict(
-                    values=[table_data[k] for k in drill_cols],
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12), # Black Text
-                    height=25
+                    values=[table_data_qual[k] for k in qual_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25
                 )
             )])
-
-            # 4. Remove margins & set height
-            fig_table.update_layout(
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=300,
-                paper_bgcolor='white'
-            )
-
-            st.plotly_chart(fig_table, use_container_width=True)
-
+            fig_qual_bad.update_layout(margin=dict(l=0, r=0, t=0, b=10), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_qual_bad, use_container_width=True, key="qual_bad_table")
         else:
-            st.info("✅ No Quality or Compliance issues found.")
+            st.success("✅ No Quality or Compliance issues found.")
+
+        # --- 2. HIGH-QUALITY SHIPMENTS (The "Good" list) ---
+        st.markdown("**Top 5 with no Defect and Compliance log**")
+        perfect_df = filtered_df[
+            (filtered_df['Defect_Flag'] == 0) & 
+            (filtered_df['Regulatory_Compliance'] == 'Pass')
+        ]
+        
+        if not perfect_df.empty:
+            table_data_perf = perfect_df.sort_values('Order_Value_USD', ascending=False)\
+                .head(5)[qual_cols]
+
+            fig_perf = go.Figure(data=[go.Table(
+                columnorder = [0, 1, 2, 3, 4, 5],
+                columnwidth = [80, 80, 70, 110, 110, 90],
+                header=dict(
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in qual_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
+                ),
+                cells=dict(
+                    values=[table_data_perf[k] for k in qual_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'black', 'black', 'green', 'black']
+                )
+            )])
+            fig_perf.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_perf, use_container_width=True, key="qual_perf_table")
+        else:
+            st.info("ℹ️ No perfect shipments found for selection.")
 # === TAB 5: RELATIONSHIP (Detailed) ===
 with tab_rel:
     st.markdown("Relationship & Responsiveness")
@@ -1793,55 +1806,66 @@ with tab_rel:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("Top 10 Partner Issue Logs")
-        drill_cols = ['Vendor', 'Country', 'Relationship_Issue', 'Collaboration_Index']
+        # --- 1. PARTNERSHIP FRICTION (The "Bad" list) ---
+        st.markdown("**Top 5 Partner Issue Logs**")
+        rel_cols = ['Vendor', 'Country', 'Relationship_Issue', 'Collaboration_Index']
 
         if not friction_df.empty:
-            # 2. Prepare Data (Remove duplicates & Take Top 15)
-            # We use drop_duplicates() here because relationship issues are usually vendor-level, not order-level
-            table_data = friction_df[drill_cols]\
+            table_data_friction = friction_df[rel_cols]\
                 .sort_values('Collaboration_Index', ascending=True)\
                 .drop_duplicates()\
-                .head(10)
+                .head(5)
 
-            # 3. Create Plotly Table
             import plotly.graph_objects as go
-
-            fig_table = go.Figure(data=[go.Table(
+            fig_fric = go.Figure(data=[go.Table(
                 columnorder = [0, 1, 2, 3],
-                # Adjust widths: Give 'Relationship Issue' the most space
                 columnwidth = [100, 70, 130, 80],
-
                 header=dict(
-                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in drill_cols], # Bold Headers
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12, family="Arial Black"), # Black Text
-                    height=30
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in rel_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
                 ),
-
                 cells=dict(
-                    values=[table_data[k] for k in drill_cols],
-                    line_color='black',       # Black Border
-                    fill_color='white',       # White Background
-                    align='left',
-                    font=dict(color='black', size=12), # Black Text
-                    height=25
+                    values=[table_data_friction[k] for k in rel_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'black', 'red']
                 )
             )])
-
-            # 4. Remove margins & set height
-            fig_table.update_layout(
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=300,
-                paper_bgcolor='white'
-            )
-
-            st.plotly_chart(fig_table, use_container_width=True)
-
+            fig_fric.update_layout(margin=dict(l=0, r=0, t=0, b=10), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_fric, use_container_width=True, key="rel_fric_table")
         else:
-            st.info("✅ All supplier relationships are in good standing.")
+            st.success("✅ All supplier relationships are in good standing.")
+
+        # --- 2. STRATEGIC PARTNERSHIPS (The "Good" list) ---
+        st.markdown("**Top 5 Partner with no Issue Logs**")
+        strategic_df = filtered_df[filtered_df['Collaboration_Index'] > 8.0]
+        
+        if not strategic_df.empty:
+            table_data_strat = strategic_df[rel_cols]\
+                .sort_values('Collaboration_Index', ascending=False)\
+                .drop_duplicates()\
+                .head(5)
+
+            fig_strat = go.Figure(data=[go.Table(
+                columnorder = [0, 1, 2, 3],
+                columnwidth = [100, 70, 130, 80],
+                header=dict(
+                    values=[f"<b>{c.replace('_', ' ')}</b>" for c in rel_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12, family="Arial Black"), height=30
+                ),
+                cells=dict(
+                    values=[table_data_strat[k] for k in rel_cols],
+                    line_color='black', fill_color='white', align='left',
+                    font=dict(color='black', size=12), height=25,
+                    font_color=['black', 'black', 'black', 'green']
+                )
+            )])
+            fig_strat.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=200, paper_bgcolor='white')
+            st.plotly_chart(fig_strat, use_container_width=True, key="rel_strat_table")
+        else:
+            st.info("ℹ️ No strategic partnerships (Score > 8.0) found in selection.")
 # === TAB 6: SIMULATOR (Includes Product Selection) ===
 # === TAB 6: SIMULATOR (Smart Update) ===
 with tab_sim:
